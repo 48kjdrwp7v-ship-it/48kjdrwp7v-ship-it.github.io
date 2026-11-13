@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة الشرف والتميز - مدرسة تيماء الثانوية بنات</title>
+    <!-- استدعاء Tailwind CSS للتصميم المتجاوب والحديث -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- استدعاء خطوط عربية جميلة من Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,700;1,700&family=Cairo:wght@400;600;700;800&family=Tajawal:wght@500;700;800&display=swap" rel="stylesheet">
+    <!-- مكتبة قصاصات الاحتفال (Confetti) -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- مكتبة Tone.js لتوليد أصوات احتفالية لطيفة بدون روابط خارجية -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+
+    <style>
+        :root {
+            --royal-blue: #1e3a8a;
+            --gold-accent: #f59e0b;
+            --soft-pink: #fce7f3;
+            --soft-sky: #e0f2fe;
+        }
+
+        body {
+            font-family: 'Cairo', 'Tajawal', sans-serif;
+            background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
+            background-image: 
+                radial-gradient(at 10% 10%, rgba(254, 243, 199, 0.7) 0px, transparent 50%),
+                radial-gradient(at 90% 15%, rgba(224, 242, 254, 0.8) 0px, transparent 50%),
+                radial-gradient(at 50% 85%, rgba(252, 231, 243, 0.7) 0px, transparent 50%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .font-amiri {
+            font-family: 'Amiri', serif;
+        }
+
+        /* حركات النجوم والزينة في الخلفية */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-12px) rotate(5deg); }
+        }
+        .floating-element {
+            animation: float 4s ease-in-out infinite;
+        }
+        .floating-delay-1 { animation-delay: 1s; }
+        .floating-delay-2 { animation-delay: 2s; }
+
+        /* تصميم بطاقة الطالبة */
+        .student-card {
+            transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+        }
+        .student-card:hover {
+            transform: translateY(-6px) scale(1.02);
+            box-shadow: 0 20px 25px -5px rgba(30, 58, 138, 0.15), 0 8px 10px -6px rgba(245, 158, 11, 0.2);
+        }
+        .student-card.selected {
+            border-color: #f59e0b;
+            background: linear-gradient(145deg, #ffffff, #fffbeb);
+            box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.25);
+        }
+
+        /* تصميم الظرف التفاعلي المتحرك */
+        .envelope-wrapper {
+            perspective: 1200px;
+        }
+
+        .envelope {
+            position: relative;
+            width: 100%;
+            max-width: 440px;
+            height: 280px;
+            background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
+            border-radius: 16px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);
+            margin: 0 auto;
+            transition: transform 0.6s ease;
+        }
+
+        /* غطاء الظرف العلوي */
+        .envelope-flap {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 150px;
+            background: linear-gradient(180deg, #2563eb 0%, #1d4ed8 100%);
+            clip-path: polygon(0 0, 50% 95%, 100% 0);
+            transform-origin: top center;
+            transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1), z-index 0.3s;
+            z-index: 30;
+            border-top-left-radius: 16px;
+            border-top-right-radius: 16px;
+        }
+
+        /* جيوب الظرف الجانبية والسفلية */
+        .envelope-pocket {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(0deg, #172554 0%, #1e3a8a 100%);
+            clip-path: polygon(0 100%, 0 25%, 50% 65%, 100% 25%, 100% 100%);
+            z-index: 20;
+            border-bottom-left-radius: 16px;
+            border-bottom-right-radius: 16px;
+            border-top: 2px solid rgba(251, 191, 36, 0.4);
+        }
+
+        /* الختم الذهبي على الظرف */
+        .wax-seal {
+            position: absolute;
+            top: 118px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 64px;
+            height: 64px;
+            background: radial-gradient(circle at 30% 30%, #fde047, #d97706);
+            border-radius: 50%;
+            z-index: 35;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3), inset 0 2px 4px rgba(255, 255, 255, 0.6);
+            border: 3px solid #fef08a;
+            transition: opacity 0.4s ease, transform 0.4s ease;
+        }
+
+        /* حالة فتح الظرف */
+        .envelope.open .envelope-flap {
+            transform: rotateX(180deg);
+            z-index: 5;
+        }
+        .envelope.open .wax-seal {
+            opacity: 0;
+            transform: translateX(-50%) scale(0.5);
+            pointer-events: none;
+        }
+
+        /* بطاقة الرسالة المنبثقة */
+        .letter-modal-card {
+            animation: popUpLetter 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+
+        @keyframes popUpLetter {
+            0% {
+                opacity: 0;
+                transform: translateY(60px) scale(0.85);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        /* زخرفة الإطار الذهبي للبطاقة */
+        .gold-border-pattern {
+            background-image: linear-gradient(white, white), linear-gradient(135deg, #f59e0b, #3b82f6, #ec4899, #f59e0b);
+            background-origin: border-box;
+            background-clip: padding-box, border-box;
+            border: 4px solid transparent;
+        }
+    </style>
+</head>
+<body class="text-slate-800 relative selection:bg-amber-200 selection:text-blue-900">
+
+    <!-- عناصر زينة عائمة في الخلفية -->
+    <div class="fixed inset-0 pointer-events-none overflow-hidden z-0" aria-hidden="true">
+        <div class="absolute top-12 right-8 text-3xl opacity-30 floating-element">✨</div>
+        <div class="absolute top-32 left-10 text-4xl opacity-25 floating-element floating-delay-1">🎓</div>
+        <div class="absolute bottom-24 right-12 text-3xl opacity-25 floating-element floating-delay-2">🌟</div>
+        <div class="absolute bottom-16 left-16 text-3xl opacity-30 floating-element">💐</div>
+        <div class="absolute top-1/2 right-4 text-2xl opacity-20 floating-element floating-delay-1">🏅</div>
+    </div>
+
+    <!-- الحاوية الرئيسية -->
+    <div class="relative z-10 max-w-5xl mx-auto px-4 py-8 sm:py-12">
+
+        <!-- ترويسة الصفحة وشعار المدرسة -->
+        <header class="bg-white/95 backdrop-blur-md rounded-3xl shadow-xl border border-amber-100 p-6 sm:p-8 mb-10 text-center relative overflow-hidden">
+            <!-- شريط علوي بألوان علم الكويت والذهب -->
+            <div class="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-emerald-600 via-amber-400 to-blue-800"></div>
+
+            <!-- شعار المدرسة -->
+            <div class="flex flex-col items-center justify-center mb-4">
+                <div class="w-40 sm:w-48 h-auto p-2 bg-white rounded-2xl shadow-sm border border-slate-100 mb-3 transition-transform duration-300 hover:scale-105">
+                    <!-- عرض صورة الشعار المرفقة مع بديل SVG أنيق في حال عدم توفر الرابط -->
+                    <img 
+                        src="image_e1a40f.jpg" 
+                        alt="شعار مدرسة تيماء الثانوية - بنات" 
+                        class="w-full h-auto object-contain rounded-xl mx-auto"
+                        onerror="this.style.display='none'; document.getElementById('fallback-logo').style.display='flex';"
+                    >
+                    <!-- شعار بديل مرسوم بدقة مطابق لهوية المدرسة -->
+                    <div id="fallback-logo" style="display: none;" class="flex-col items-center justify-center py-2">
+                        <svg class="w-24 h-20" viewBox="0 0 120 90" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <!-- أشكال الطالبات باللون الذهبي -->
+                            <circle cx="62" cy="18" r="7" fill="#FBBF24"/>
+                            <path d="M58 55C56 42 54 30 62 26C68 23 76 24 80 26C70 30 66 42 63 55H58Z" fill="#FBBF24"/>
+                            <circle cx="44" cy="30" r="5" fill="#F59E0B"/>
+                            <path d="M52 55C48 45 42 38 36 36C43 35 50 40 55 55H52Z" fill="#F59E0B"/>
+                            <circle cx="80" cy="34" r="5" fill="#F59E0B"/>
+                            <path d="M67 55C70 46 77 40 86 40C78 43 73 48 70 55H67Z" fill="#F59E0B"/>
+                            <!-- الكتاب المفتوح باللون الأزرق الملكي -->
+                            <path d="M60 66C45 58 25 58 10 62L18 72C32 68 48 68 60 74C72 68 88 68 102 72L110 62C95 58 75 58 60 66Z" fill="#1D4ED8"/>
+                            <path d="M60 61C48 53 32 51 20 53L25 60C37 58 49 60 60 66C71 60 83 58 95 60L100 53C88 51 72 53 60 61Z" fill="#2563EB"/>
+                            <path d="M8 80C35 72 85 72 112 80C85 75 35 75 8 80Z" fill="#1E3A8A"/>
+                        </svg>
+                        <span class="text-[10px] font-bold tracking-wider text-slate-700 mt-1">TAIMA HIGH SCHOOL FOR GIRLS</span>
+                    </div>
+                </div>
+
+                <h2 class="text-lg sm:text-xl font-extrabold text-blue-950">مدرسة تيماء الثانوية - بنات</h2>
+                <span class="inline-block mt-1 px-4 py-0.5 rounded-full text-xs sm:text-sm font-bold bg-amber-50 text-amber-800 border border-amber-300">
+                    نظام مسارات • الهيئة التعليمية والإدارية
+                </span>
+            </div>
+
+            <div class="w-24 h-1 bg-gradient-to-r from-transparent via-amber-400 to-transparent mx-auto my-4"></div>
+
+            <!-- عنوان التكريم الرئيسي -->
+            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-gradient-to-r from-amber-100 to-yellow-100 text-amber-900 font-bold text-sm mb-3 shadow-sm">
+                <span>🏆</span>
+                <span>تهنئة خاصة للمتفوقات</span>
+                <span>🏆</span>
+            </div>
+
+            <h1 class="text-3xl sm:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-l from-blue-900 via-blue-700 to-amber-600 mb-3 py-1">
+                لوحة الشرف والتميز ✨
+            </h1>
+
+            <p class="text-base sm:text-xl text-slate-700 font-semibold max-w-2xl mx-auto leading-relaxed">
+                تكريم الطالبات المتفوقات والحاصلات على <span class="text-amber-600 font-extrabold underline decoration-amber-300 decoration-4 underline-offset-4">الدرجة النهائية</span> في مقرر:
+                <br class="hidden sm:inline">
+                <span class="inline-block mt-2 px-4 py-1 bg-blue-900 text-white rounded-xl shadow-sm text-base sm:text-lg">
+                    🇰🇼 دولة الكويت: المسيرة والكيان — شعبة (٢)
+                </span>
+            </p>
+        </header>
+
+        <!-- قسم التعليمات التفاعلية -->
+        <div class="text-center mb-8">
+            <p class="inline-flex items-center gap-2 bg-white/80 backdrop-blur px-5 py-2.5 rounded-2xl shadow-sm border border-blue-100 text-blue-900 font-bold text-sm sm:text-base">
+                <span class="text-xl">👇</span>
+                <span>عزيزتي الطالبة المتفوقة.. اختاري اسمكِ من القائمة واضغطي على زر الرسالة لتكتشفي تهنئتكِ الخاصة!</span>
+            </p>
+        </div>
+
+        <!-- شبكة بطاقات الطالبات الست (شعبة ٢) -->
+        <main id="students-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 mb-12">
+            <!-- يتم توليد البطاقات تلقائياً بواسطة JavaScript لضمان الدقة والتنظيم -->
+        </main>
+
+        <!-- تذييل الصفحة وتوقيع المعلمة -->
+        <footer class="text-center mt-12 pb-6">
+            <div class="inline-block bg-white/90 backdrop-blur px-8 py-4 rounded-3xl shadow-md border border-amber-200">
+                <p class="text-slate-600 text-sm mb-1">بكل فخر واعتزاز بكنّ يا بناتي المتميزات</p>
+                <p class="font-amiri text-2xl font-bold text-blue-900">
+                    معلمتكِ الفخورة بكِ: أ. عليه الفريدي 💐
+                </p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- نافذة الظرف التفاعلي والرسالة (Modal) -->
+    <div id="letter-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-900/70 backdrop-blur-sm transition-opacity duration-300" role="dialog" aria-modal="true">
+        <div class="w-full max-w-xl mx-auto relative">
+            
+            <!-- مرحلة 1: الظرف المغلق الذي يُفتح بحركة انسيابية -->
+            <div id="envelope-stage" class="text-center py-6">
+                <p class="text-white text-lg sm:text-xl font-bold mb-6 animate-pulse">
+                    ✨ جاري فتح رسالة التقدير الخاصة بـ <span id="envelope-student-name" class="text-amber-300"></span>...
+                </p>
+                
+                <div class="envelope-wrapper px-2">
+                    <div id="interactive-envelope" class="envelope">
+                        <!-- غطاء الظرف -->
+                        <div class="envelope-flap"></div>
+                        <!-- جيب الظرف -->
+                        <div class="envelope-pocket flex flex-col items-center justify-end pb-6 px-4">
+                            <span class="text-amber-300 text-xs font-bold tracking-wider mb-1">مدرسة تيماء الثانوية - بنات</span>
+                            <span id="envelope-front-label" class="text-white font-amiri text-xl sm:text-2xl font-bold">إلى المتفوقة...</span>
+                        </div>
+                        <!-- الختم الذهبي -->
+                        <div class="wax-seal">
+                            <span class="text-2xl">🎓</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- مرحلة 2: بطاقة الشكر المفتوحة -->
+            <div id="card-stage" class="hidden letter-modal-card gold-border-pattern rounded-3xl shadow-2xl p-6 sm:p-10 text-center relative overflow-hidden bg-white">
+                <!-- زخارف الزوايا -->
+                <div class="absolute top-3 right-4 text-2xl opacity-60">✨</div>
+                <div class="absolute top-3 left-4 text-2xl opacity-60">🌟</div>
+                <div class="absolute bottom-3 right-4 text-2xl opacity-60">🌸</div>
+                <div class="absolute bottom-3 left-4 text-2xl opacity-60">🏅</div>
+
+                <!-- شارة الدرجة النهائية -->
+                <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-100 text-amber-900 font-extrabold text-xs sm:text-sm mb-4 border border-amber-300">
+                    <span>💯</span>
+                    <span>الدرجة النهائية • مقرر دولة الكويت: المسيرة والكيان</span>
+                </div>
+
+                <!-- اسم الطالبة المكرمّة -->
+                <h3 class="text-slate-500 text-sm sm:text-base font-bold mb-1">إلى ابنتي الطالبة المتألقة:</h3>
+                <h2 id="card-student-name" class="font-amiri text-3xl sm:text-4xl font-bold text-blue-900 mb-5">
+                    اسم الطالبة
+                </h2>
+
+                <!-- نص رسالة الشكر المخصصة -->
+                <div class="bg-gradient-to-b from-blue-50/70 to-amber-50/50 rounded-2xl p-5 sm:p-6 mb-6 border border-blue-100/80 shadow-inner">
+                    <p id="card-message-body" class="text-slate-800 text-base sm:text-lg leading-loose font-semibold">
+                        نص الرسالة هنا...
+                    </p>
+                </div>
+
+                <!-- توقيع المعلمة -->
+                <div class="mb-7">
+                    <p class="text-xs sm:text-sm text-slate-500 font-bold mb-1">مع أصدق الدعوات لكِ بدوام التوفيق والنجاح</p>
+                    <p class="font-amiri text-2xl sm:text-3xl font-bold text-amber-600">
+                        معلمتكِ الفخورة بكِ: أ. عليه الفريدي
+                    </p>
+                </div>
+
+                <!-- أزرار التحكم -->
+                <div class="flex flex-wrap items-center justify-center gap-3">
+                    <button 
+                        onclick="triggerCelebrationConfetti()" 
+                        class="px-5 py-3 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold text-sm sm:text-base transition flex items-center gap-2 shadow-sm active:scale-95"
+                    >
+                        <span>🎉</span>
+                        <span>احتفلي مجدداً</span>
+                    </button>
+
+                    <button 
+                        onclick="closeLetterModal()" 
+                        class="px-6 py-3 rounded-xl bg-gradient-to-r from-blue-900 to-blue-700 hover:from-blue-800 hover:to-blue-600 text-white font-bold text-sm sm:text-base transition flex items-center gap-2 shadow-md active:scale-95"
+                    >
+                        <span>إغلاق والعودة للقائمة</span>
+                        <span>↩️</span>
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // بيانات الطالبات الست (شعبة ٢) المستخرجة بدقة من الصورة المرفقة مع رسائل شكر متنوعة ومخصصة لكل طالبة
+        const studentsData = [
+            {
+                id: 1,
+                name: "رانيا عبدالله العتيبي",
+                badge: "نجمة التميز 🌟",
+                colorTheme: "from-blue-600 to-indigo-700",
+                message: "مباركٌ لكِ يا رانيا هذا التفوق الباهر وحصولكِ على الدرجة النهائية في مقرر (دولة الكويت: المسيرة والكيان). لقد أثبتِّ باجتهادكِ وحرصكِ الدائم أن القمة تليق بالمثابرات أمثالكِ. دمتِ فخراً لوطنكِ الكويت ولمدرستكِ، ومنها إلى أعلى المراتب العلمية بإذن الله!"
+            },
+            {
+                id: 2,
+                name: "ريم فلاح المطوطح",
+                badge: "فخر الشعبة 🏅",
+                colorTheme: "from-amber-500 to-orange-600",
+                message: "إلى المبدعة ريم.. أهنئكِ من القلب على هذا الإنجاز المشرف والدرجة الكاملة! تميزكِ في فهم تاريخ ومسيرة وطننا الغالي الكويت يعكس وعيكِ واهتمامكِ الكبير. استمري بهذا الشغف والتألق، فالمستقبل المشرق بانتظاركِ دائماً."
+            },
+            {
+                id: 3,
+                name: "الزين سعد السريل",
+                badge: "تألق وإبداع ✨",
+                colorTheme: "from-emerald-600 to-teal-700",
+                message: "اسماً على مسمى يا الزين.. زان تفوقكِ بحصولكِ على الدرجة النهائية بكل جدارة واستحقاق! فخورة جداً بتركيزكِ العالي ومشاركتكِ المتميزة في مقرر (دولة الكويت: المسيرة والكيان). أسأل الله لكِ توفيقاً يلازم خطاكِ في كل مراحل حياتكِ."
+            },
+            {
+                id: 4,
+                name: "فضيله فهد العلاطي",
+                badge: "همة عالية 🎓",
+                colorTheme: "from-purple-600 to-indigo-700",
+                message: "بارك الله في جهودكِ يا فضيلة! حصولكِ على الدرجة النهائية هو ثمرة طبيعية لجدكِ واجتهادكِ وحبكِ للعلم والوطن. أعتز بطالبة مثلكِ تجمع بين الخلق الرفيع والتفوق الدراسي. كل التوفيق لكِ في مسيرتكِ التعليمية."
+            },
+            {
+                id: 5,
+                name: "أنفال وليد العتيبي",
+                badge: "عطاء متجدد 🌸",
+                colorTheme: "from-pink-600 to-rose-700",
+                message: "هنيئاً لكِ يا أنفال هذا التميز الرائع والدرجة الكاملة في مقرر (دولة الكويت: المسيرة والكيان)! لقد أبدعتِ وتألقتِ، وكنتِ نموذجاً يحتذى به في الاجتهاد والطموح. أتمنى لكِ مزيداً من النجاحات الباهرة التي تثلج الصدر."
+            },
+            {
+                id: 6,
+                name: "عائشه مصعب السعيدي",
+                badge: "قمة التفوق 👑",
+                colorTheme: "from-sky-600 to-blue-800",
+                message: "كل الفخر والاعتزاز بكِ يا عائشة على تحقيقكِ الدرجة النهائية بكل اقتدار! إن تفوقكِ في دراسة مسيرة وكيان وطننا الحبيب الكويت يدل على روحكِ الوطنية العالية واجتهادكِ المتواصل. دمتِ متألقة ومتميزة في كل ميادين العلم."
+            }
+        ];
+
+        let selectedStudentId = null;
+
+        // دالة لبناء بطاقات الطالبات في الصفحة
+        function renderStudentsGrid() {
+            const grid = document.getElementById('students-grid');
+            grid.innerHTML = '';
+
+            studentsData.forEach((student, index) => {
+                const card = document.createElement('div');
+                card.id = `student-card-${student.id}`;
+                card.className = "student-card rounded-3xl p-6 border-2 border-blue-100/80 shadow-lg flex flex-col justify-between items-center text-center cursor-pointer relative overflow-hidden";
+                card.onclick = () => selectStudentCard(student.id);
+
+                card.innerHTML = `
+                    <!-- رقم الطالبة في القائمة -->
+                    <div class="w-full flex items-center justify-between mb-4">
+                        <span class="w-9 h-9 rounded-full bg-blue-900 text-white font-extrabold flex items-center justify-center text-sm shadow-sm">
+                            ${index + 1}
+                        </span>
+                        <span class="px-3 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200">
+                            ${student.badge}
+                        </span>
+                    </div>
+
+                    <!-- أيقونة رمزية -->
+                    <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-50 to-amber-50 border border-amber-200/60 flex items-center justify-center text-3xl mb-3 shadow-inner">
+                        👩‍🎓
+                    </div>
+
+                    <!-- اسم الطالبة -->
+                    <h3 class="text-xl sm:text-2xl font-extrabold text-blue-950 mb-1">
+                        ${student.name}
+                    </h3>
+                    <p class="text-xs text-slate-500 font-semibold mb-5">
+                        حاصلة على الدرجة النهائية 💯
+                    </p>
+
+                    <!-- زر فتح الرسالة -->
+                    <button 
+                        type="button"
+                        onclick="event.stopPropagation(); openStudentEnvelope(${student.id});"
+                        class="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r ${student.colorTheme} hover:opacity-95 text-white font-bold text-sm sm:text-base shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-2 active:scale-95"
+                    >
+                        <span>تعرفي على رسالتك</span>
+                        <span class="text-lg">💌</span>
+                    </button>
+                `;
+
+                grid.appendChild(card);
+            });
+        }
+
+        // تحديد البطاقة بصرياً عند النقر عليها
+        function selectStudentCard(id) {
+            selectedStudentId = id;
+            document.querySelectorAll('.student-card').forEach(el => el.classList.remove('selected'));
+            const activeCard = document.getElementById(`student-card-${id}`);
+            if (activeCard) {
+                activeCard.classList.add('selected');
+            }
+        }
+
+        // تشغيل صوت احتفالي لطيف باستخدام Tone.js عند فتح الظرف
+        function playCelebrationSound() {
+            try {
+                if (typeof Tone !== 'undefined') {
+                    Tone.start();
+                    const synth = new Tone.PolySynth(Tone.Synth, {
+                        oscillator: { type: "triangle" },
+                        envelope: { attack: 0.02, decay: 0.2, sustain: 0.2, release: 0.8 }
+                    }).toDestination();
+                    synth.volume.value = -8;
+                    const now = Tone.now();
+                    synth.triggerAttackRelease("C5", "8n", now);
+                    synth.triggerAttackRelease("E5", "8n", now + 0.1);
+                    synth.triggerAttackRelease("G5", "8n", now + 0.2);
+                    synth.triggerAttackRelease("C6", "4n", now + 0.3);
+                }
+            } catch (e) {
+                // تجاهل في حال منع المتصفح الصوت التلقائي
+            }
+        }
+
+        // إطلاق قصاصات الاحتفال الملونة (Confetti)
+        function triggerCelebrationConfetti() {
+            if (typeof confetti === 'function') {
+                confetti({
+                    particleCount: 85,
+                    spread: 70,
+                    origin: { y: 0.6 },
+                    colors: ['#1e3a8a', '#f59e0b', '#10b981', '#ec4899', '#3b82f6']
+                });
+            }
+        }
+
+        // فتح الظرف التفاعلي وعرض رسالة الطالبة
+        function openStudentEnvelope(studentId) {
+            selectStudentCard(studentId);
+            const student = studentsData.find(s => s.id === studentId);
+            if (!student) return;
+
+            const modal = document.getElementById('letter-modal');
+            const envelopeStage = document.getElementById('envelope-stage');
+            const cardStage = document.getElementById('card-stage');
+            const envelopeEl = document.getElementById('interactive-envelope');
+
+            // تعبئة بيانات الطالبة في الظرف والبطاقة
+            document.getElementById('envelope-student-name').textContent = student.name;
+            document.getElementById('envelope-front-label').textContent = `إلى: ${student.name}`;
+            document.getElementById('card-student-name').textContent = student.name;
+            document.getElementById('card-message-body').textContent = student.message;
+
+            // إعادة ضبط حالة الظرف ليبدأ مغلقاً
+            envelopeEl.classList.remove('open');
+            envelopeStage.classList.remove('hidden');
+            cardStage.classList.add('hidden');
+
+            // إظهار النافذة
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+
+            // تشغيل الصوت
+            playCelebrationSound();
+
+            // فتح غطاء الظرف بعد لحظة قصيرة
+            setTimeout(() => {
+                envelopeEl.classList.add('open');
+            }, 350);
+
+            // إظهار بطاقة الشكر وإطلاق قصاصات الاحتفال بعد اكتمال فتح الظرف
+            setTimeout(() => {
+                envelopeStage.classList.add('hidden');
+                cardStage.classList.remove('hidden');
+                triggerCelebrationConfetti();
+            }, 1150);
+        }
+
+        // إغلاق نافذة الرسالة والعودة لاختيار طالبة أخرى
+        function closeLetterModal() {
+            const modal = document.getElementById('letter-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        // إغلاق النافذة عند النقر خارج البطاقة
+        document.getElementById('letter-modal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeLetterModal();
+            }
+        });
+
+        // تهيئة الصفحة عند التحميل
+        window.addEventListener('DOMContentLoaded', () => {
+            renderStudentsGrid();
+        });
+    </script>
+</body>
+</html>
